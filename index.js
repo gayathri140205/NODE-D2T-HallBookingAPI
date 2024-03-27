@@ -1,6 +1,7 @@
 const express=require('express');
 const bodyParser=require('body-parser');
 const app=express();
+
 const PORT=3000;
 
 app.use(bodyParser.urlencoded({extended:false}));
@@ -14,27 +15,26 @@ const bookings=[];
 function generateBookingId(){
   return bookings.length+1;
 }
-
-// //Route to list all rooms
-// app.get('/rooms',(req,res)=>{
-//   res.json(rooms);
-// });
+// Route to list all rooms
+app.get('/rooms',(req,res)=>{
+  res.json(rooms);
+});
 
 //Route to create a room
 app.post('/create-room',(req,res)=>{
   const{ roomNumber,seatsAvailable,amenities,pricePerHour}=req.body;
   
-  //Validate input
+
   if(!roomNumber||!seatsAvailable||!pricePerHour){
     return res.status(400).json({message:'Room number,seats Available,pricePer hour are required'})
   }
-  //check if the room number already exits
+ 
   const isRoomExist=rooms.some((room)=>room.roomNumber===roomNumber);
 
   if(isRoomExist){
     return res.status(409).json({message:'Room number already exists'});
   }
-  //Add the room to the list
+
   rooms.push({
     roomNumber,
     seatsAvailable,
@@ -48,25 +48,25 @@ app.post('/create-room',(req,res)=>{
 app.post('/book-room',(req,res)=>{
   const{roomId,customerName,date,startTime,endTime}=req.body;
 
-  //Validate input
+
   if (!roomId || !customerName ||!date||!startTime ||!endTime ) {
     return  res.status(400).json({ message:"RoomId,customerName,date,startTime,endTime are required" }) ;
   }
 
-  //check if the room exists
+
   const room=rooms.find((room)=>room.roomNumber===roomId);
   if(!room){
     return res.status(404).json({message:'Room not Found'})
   }
 
-  //check if the room is available for booking
+
   const isRoomAvailable=true;
   if(!isRoomAvailable){
     return res.status(409).json({message:'Room is not available for specified time'});
   }
-//Generate a unique bookingId
+
 const bookingId=generateBookingId();
-  //Add the booking to the list
+
   bookings.push({
     bookingId,
     roomId,
@@ -74,7 +74,7 @@ const bookingId=generateBookingId();
     date,
     startTime,
     endTime,
-    bookingDate:new Date(),//Timestamp of the booking
+    bookingDate,
     bookingStatus:'Confirmed',
   });
   res.json({message:'Room booked successfully'});
